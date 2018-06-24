@@ -6,7 +6,7 @@
     "extends": ["airbnb-base", "prettier"],
     "rules": {
         "func-names": 0,
-        "max-len": [1, 120],
+        "max-len": [1, 240],
         "no-unused-vars": 0,
         "no-script-url": 0,
         "import/no-unresolved": 0,

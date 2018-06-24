@@ -1,4 +1,4 @@
-import commando from "discord.js-commando";
+import Commando from "discord.js-commando";
 import path from "path";
 import config from "config";
 import { oneLine } from "common-tags";
@@ -8,7 +8,7 @@ import requestCacheSupport from "request-promise-cache";
 import checkCustomCommands from "./helpers/customCommands";
 import controlPanel from "./web/controlPanel";
 
-module.exports = class Wunderbot extends commando.Client {
+module.exports = class Wunderbot extends Commando.Client {
     constructor() {
         super({
             owner: config.get("Wunderbot.owner"),
@@ -33,9 +33,7 @@ module.exports = class Wunderbot extends commando.Client {
  ###  ###   #######  ##    ## ########  ######## ##     ## ########   #######     ##
 
 `);
-                console.log(
-                    `Client ready; logged in as ${this.user.username}#${this.user.discriminator} (${this.user.id})`
-                );
+                console.log(`Client ready; logged in as ${this.user.username}#${this.user.discriminator} (${this.user.id})`);
             })
             .on("disconnect", () => {
                 console.warn("Disconnected!");
@@ -74,16 +72,12 @@ module.exports = class Wunderbot extends commando.Client {
             `);
             });
 
-        this.setProvider(
-            MongoClient.connect(config.get("Wunderbot.dbUrl"), { useNewUrlParser: true }).then(
-                client => new MongoDBProvider(client.db(config.get("Wunderbot.dbName")))
-            )
-        ).catch(console.error);
+        this.setProvider(MongoClient.connect(config.get("Wunderbot.dbUrl"), { useNewUrlParser: true }).then(client => new MongoDBProvider(client.db(config.get("Wunderbot.dbName"))))).catch(console.error);
         this.registry
             .registerDefaults()
+            .registerGroup("crypto", "Crypto")
             .registerTypesIn(path.join(__dirname, "types"))
             .registerCommandsIn(path.join(__dirname, "commands"));
-        // .registerGroup("util", "Utility");
         this.login(config.get("Wunderbot.token"));
         controlPanel(this); // Lets start the control panel!
     }
