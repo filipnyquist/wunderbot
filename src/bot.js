@@ -6,7 +6,8 @@ import { MongoClient } from "mongodb";
 import MongoDBProvider from "commando-provider-mongo";
 import requestCacheSupport from "request-promise-cache";
 import checkCustomCommands from "./helpers/customCommands";
-import controlPanel from "./web/controlPanel";
+import welcomeEvent from "./helpers/welcomeEvent";
+// import controlPanel from "./web/controlPanel";
 
 module.exports = class Wunderbot extends Commando.Client {
     constructor() {
@@ -20,6 +21,7 @@ module.exports = class Wunderbot extends Commando.Client {
         this.on("message", msg => {
             checkCustomCommands(msg, this);
         });
+        this.on("guildMemberAdd", member => welcomeEvent(member, this));
         this.on("error", console.error)
             .on("warn", console.warn)
             // .on("debug", console.log)
@@ -42,7 +44,7 @@ module.exports = class Wunderbot extends Commando.Client {
                 console.warn("Reconnecting...");
             })
             .on("commandError", (cmd, err) => {
-                if (err instanceof commando.FriendlyError) return;
+                if (err instanceof Commando.FriendlyError) return;
                 console.error(`Error in command ${cmd.groupID}:${cmd.memberName}`, err);
             })
             .on("commandBlocked", (msg, reason) => {
@@ -75,10 +77,14 @@ module.exports = class Wunderbot extends Commando.Client {
         this.setProvider(MongoClient.connect(config.get("Wunderbot.dbUrl"), { useNewUrlParser: true }).then(client => new MongoDBProvider(client.db(config.get("Wunderbot.dbName"))))).catch(console.error);
         this.registry
             .registerDefaults()
+            .registerGroup("info", "Info")
+            .registerGroup("general", "General")
+            .registerGroup("moderation", "Moderation")
+            .registerGroup("lbry", "LBRY")
             .registerGroup("crypto", "Crypto")
             .registerTypesIn(path.join(__dirname, "types"))
             .registerCommandsIn(path.join(__dirname, "commands"));
         this.login(config.get("Wunderbot.token"));
-        controlPanel(this); // Lets start the control panel!
+        // controlPanel(this); // Lets start the control panel!
     }
 };
