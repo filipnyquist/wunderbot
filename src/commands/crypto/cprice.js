@@ -1,15 +1,15 @@
 import commando from "discord.js-commando";
 import Discord from "discord.js";
 
-module.exports = class UserInfoCommand extends commando.Command {
+module.exports = class PriceCommand extends commando.Command {
     constructor(client) {
         super(client, {
-            name: "cprice",
-            aliases: ["cp"],
+            name: "price",
+            aliases: ["cp", "altprice"],
             group: "crypto",
-            memberName: "cprice",
+            memberName: "price",
             description: "Displays price of a specific alt coin from cryptocompare.",
-            examples: ["cprice BTC USD 1", "cprice LBC EUR 100"],
+            examples: ["price BTC USD 1", "price LBC EUR 100"],
             guildOnly: false,
 
             args: [
@@ -17,18 +17,21 @@ module.exports = class UserInfoCommand extends commando.Command {
                     key: "coin",
                     label: "coin",
                     prompt: "What coin would you like to check the value of?",
+                    default: "LBC",
                     type: "string"
                 },
                 {
                     key: "fiat",
                     label: "fiat",
                     prompt: "The fiat currency to check?",
+                    default: "USD",
                     type: "string"
                 },
                 {
                     key: "amount",
                     label: "amount",
                     prompt: "The number of coins to check the value of?",
+                    default: 100,
                     type: "float"
                 }
             ]
@@ -45,16 +48,16 @@ module.exports = class UserInfoCommand extends commando.Command {
                 cacheLimit: 3,
                 resolveWithFullResponse: true
             });
-            console.log(headers);
+            const coinVal = JSON.parse(body)[fiat.toUpperCase()];
             const embed = new Discord.RichEmbed()
                 .setTitle(`The value of ${amount} ${coin.toUpperCase()} in ${fiat.toUpperCase()}`)
                 .setColor(0x00ae86)
                 .setFooter("Wunderbot | Cryptocompare API", "http://i.imgur.com/w1vhFSR.png")
                 .setTimestamp(new Date(Date.parse(headers.date)))
                 .setURL(`https://www.cryptocompare.com/coins/${coin.toLowerCase()}/overview/${fiat.toLowerCase()}`)
-                .addField("Price per coin", `The price per coin is ${JSON.parse(body)[fiat.toUpperCase()]} ${fiat.toUpperCase()}`)
-                .addField("Result", `The value of ${amount} ${coin.toUpperCase()} is ${JSON.parse(body)[fiat.toUpperCase()] * amount} ${fiat.toUpperCase()}`);
-            msg.reply(embed);
+                .addField("Price per coin", `The price per coin is ${coinVal} ${fiat.toUpperCase()}`)
+                .addField("Result", `The value of ${amount} ${coin.toUpperCase()} is ${(coinVal * amount).toFixed(3)} ${fiat.toUpperCase()}`);
+            return msg.embed(embed);
         } catch (e) {
             console.log(e);
             return msg.reply("Could not talk to the cryptocompare API. Try again later.");
